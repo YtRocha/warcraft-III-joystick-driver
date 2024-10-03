@@ -1,1 +1,1 @@
-/home/leld21/projeto/hid-playstation.o
+/home/leld21/Documents/GitHub/warcraft-III-joystick-driver/hid-playstation.o

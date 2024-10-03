@@ -11,6 +11,7 @@
 #include <linux/hid.h>
 #include <linux/idr.h>
 #include <linux/input/mt.h>
+#include <linux/input.h>
 #include <linux/leds.h>
 #include <linux/led-class-multicolor.h>
 #include <linux/module.h>
@@ -523,6 +524,7 @@ static const int ps_gamepad_buttons[] = {
 	BTN_THUMBL, /* L3 */
 	BTN_THUMBR, /* R3 */
 	BTN_MODE, /* PS Home */
+	KEY_W
 };
 
 static const struct {int x; int y; } ps_gamepad_hat_mapping[] = {
@@ -2227,7 +2229,11 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	input_report_abs(ds4->gamepad, ABS_HAT0X, ps_gamepad_hat_mapping[value].x);
 	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
-	input_report_key(ds4->gamepad, BTN_WEST,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	input_report_key(ds4->gamepad, KEY_W,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+
+
+
+
 	input_report_key(ds4->gamepad, BTN_SOUTH,  ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 	input_report_key(ds4->gamepad, BTN_EAST,   ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 	input_report_key(ds4->gamepad, BTN_NORTH, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);	
