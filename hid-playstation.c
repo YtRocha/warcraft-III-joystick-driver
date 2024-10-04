@@ -747,9 +747,9 @@ static struct input_dev *keyboard_create(struct hid_device *hdev) {
     int ret;
 
     // Aloca o dispositivo de entrada
-    keyboard = input_allocate_device();
-    if (!keyboard)
-        return ERR_PTR(-ENOMEM);
+	keyboard = ps_allocate_input_dev(hdev, "Keyboard");
+	if (IS_ERR(keyboard))
+		return ERR_CAST(keyboard);
 
     // Define as capacidades do teclado
     input_set_capability(keyboard, EV_KEY, KEY_W); // Mapeia a tecla "W"
