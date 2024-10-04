@@ -28,6 +28,7 @@ static DEFINE_IDA(ps_player_id_allocator);
 
 #define HID_PLAYSTATION_VERSION_PATCH 0x8000
 
+
 /* Base class for playstation devices. */
 struct ps_device {
 	struct list_head list;
@@ -362,6 +363,7 @@ struct dualshock4 {
 	struct input_dev *gamepad;
 	struct input_dev *sensors;
 	struct input_dev *touchpad;
+	struct input_dev *keyboard_dev;
 
 	/* Calibration data for accelerometer and gyroscope. */
 	struct ps_calibration_data accel_calib_data[3];
@@ -738,6 +740,32 @@ static struct input_dev *ps_gamepad_create(struct hid_device *hdev,
 		return ERR_PTR(ret);
 
 	return gamepad;
+}
+
+static struct input_dev *keyboard_create(struct hid_device *hdev) {
+    struct input_dev *keyboard;
+    int ret;
+
+    // Aloca o dispositivo de entrada
+    keyboard = input_allocate_device();
+    if (!keyboard)
+        return ERR_PTR(-ENOMEM);
+
+    // Define as capacidades do teclado
+    input_set_capability(keyboard, EV_KEY, KEY_W); // Mapeia a tecla "W"
+    input_set_capability(keyboard, EV_KEY, KEY_A); // Adicione outras teclas conforme necessário
+    input_set_capability(keyboard, EV_KEY, KEY_S);
+    input_set_capability(keyboard, EV_KEY, KEY_D);
+    // ... adicione outras teclas conforme necessário
+
+    // Registra o dispositivo
+    ret = input_register_device(keyboard);
+    if (ret) {
+        input_free_device(keyboard);
+        return ERR_PTR(ret);
+    }
+
+    return keyboard;
 }
 
 static int ps_get_report(struct hid_device *hdev, uint8_t report_id, uint8_t *buf, size_t size,
@@ -1666,6 +1694,7 @@ static struct ps_device *dualsense_create(struct hid_device *hdev)
 		ret = PTR_ERR(ds->gamepad);
 		goto err;
 	}
+
 	/* Use gamepad input device name as primary device name for e.g. LEDs */
 	ps_dev->input_dev_name = dev_name(&ds->gamepad->dev);
 
@@ -2229,7 +2258,13 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	input_report_abs(ds4->gamepad, ABS_HAT0X, ps_gamepad_hat_mapping[value].x);
 	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
-	input_report_key(ds4->gamepad, KEY_W,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	//input_report_key(ds4->gamepad, KEY_W,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	if (ds4_report->buttons[0] & DS_BUTTONS0_SQUARE) {
+		input_report_key(ds4->keyboard_dev, KEY_W, 1); // Reporta "W" pressionada
+	} else {
+		input_report_key(ds4->keyboard_dev, KEY_W, 0); // Reporta "W" liberada
+	}
+	input_sync(ds4->keyboard_dev);
 
 
 
@@ -2575,6 +2610,13 @@ static struct ps_device *dualshock4_create(struct hid_device *hdev)
 		ret = PTR_ERR(ds4->gamepad);
 		goto err;
 	}
+
+	// chamada para criar keyboard
+	ds4->keyboard_dev = keyboard_create(hdev); 
+    if (IS_ERR(ds4->keyboard_dev)) {
+        ret = PTR_ERR(ds4->keyboard_dev);
+        goto err;
+    }
 
 	/* Use gamepad input device name as primary device name for e.g. LEDs */
 	ps_dev->input_dev_name = dev_name(&ds4->gamepad->dev);

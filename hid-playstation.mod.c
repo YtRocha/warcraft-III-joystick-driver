@@ -35,7 +35,6 @@ MODULE_INFO(retpoline, "Y");
 
 static const struct modversion_info ____versions[]
 __used __section("__versions") = {
-	{ 0xbbc0524a, "hid_hw_stop" },
 	{ 0xdbc7d480, "hid_hw_raw_request" },
 	{ 0x4c03a563, "random_kmalloc_seed" },
 	{ 0x1512a32c, "kmalloc_caches" },
@@ -58,8 +57,10 @@ __used __section("__versions") = {
 	{ 0x656e4a6e, "snprintf" },
 	{ 0xa916b694, "strnlen" },
 	{ 0xbcab6ee6, "sscanf" },
+	{ 0x9cbca772, "input_allocate_device" },
 	{ 0xe7a02573, "ida_alloc_range" },
 	{ 0x24838e3a, "devm_led_classdev_multicolor_register_ext" },
+	{ 0x23c878a2, "input_free_device" },
 	{ 0xcbd4898c, "fortify_panic" },
 	{ 0xbdfb6dbb, "__fentry__" },
 	{ 0xf90a1e85, "__x86_indirect_thunk_r8" },
@@ -93,6 +94,7 @@ __used __section("__versions") = {
 	{ 0xffb7c514, "ida_free" },
 	{ 0x65487097, "__x86_indirect_thunk_rax" },
 	{ 0xb942205f, "hid_hw_close" },
+	{ 0xbbc0524a, "hid_hw_stop" },
 	{ 0x21f04203, "module_layout" },
 };
 
@@ -108,4 +110,4 @@ MODULE_ALIAS("hid:b0003g*v0000054Cp00000CE6");
 MODULE_ALIAS("hid:b0005g*v0000054Cp00000DF2");
 MODULE_ALIAS("hid:b0003g*v0000054Cp00000DF2");
 
-MODULE_INFO(srcversion, "63D373640F38056A5E1295D");
+MODULE_INFO(srcversion, "F70EFA5125269D93D00FD48");
