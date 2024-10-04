@@ -48,8 +48,8 @@ __used __section("__versions") = {
 	{ 0x59c5aee3, "input_mt_sync_frame" },
 	{ 0x2d3385d3, "system_wq" },
 	{ 0xc5b6f236, "queue_work_on" },
-	{ 0x221e0632, "input_ff_create_memless" },
 	{ 0xc5fe2641, "led_mc_calc_color_components" },
+	{ 0x221e0632, "input_ff_create_memless" },
 	{ 0xde3576f8, "hid_open_report" },
 	{ 0xd007ee1d, "hid_hw_start" },
 	{ 0x20a9c5c9, "hid_hw_open" },
@@ -57,7 +57,6 @@ __used __section("__versions") = {
 	{ 0x656e4a6e, "snprintf" },
 	{ 0xa916b694, "strnlen" },
 	{ 0xbcab6ee6, "sscanf" },
-	{ 0x9cbca772, "input_allocate_device" },
 	{ 0xe7a02573, "ida_alloc_range" },
 	{ 0x24838e3a, "devm_led_classdev_multicolor_register_ext" },
 	{ 0x23c878a2, "input_free_device" },
@@ -98,7 +97,7 @@ __used __section("__versions") = {
 	{ 0x21f04203, "module_layout" },
 };
 
-MODULE_INFO(depends, "hid,ff-memless,led-class-multicolor");
+MODULE_INFO(depends, "hid,led-class-multicolor,ff-memless");
 
 MODULE_ALIAS("hid:b0005g*v0000054Cp000005C4");
 MODULE_ALIAS("hid:b0003g*v0000054Cp000005C4");
@@ -110,4 +109,4 @@ MODULE_ALIAS("hid:b0003g*v0000054Cp00000CE6");
 MODULE_ALIAS("hid:b0005g*v0000054Cp00000DF2");
 MODULE_ALIAS("hid:b0003g*v0000054Cp00000DF2");
 
-MODULE_INFO(srcversion, "F70EFA5125269D93D00FD48");
+MODULE_INFO(srcversion, "FEBAECD06856391D3424C08");
