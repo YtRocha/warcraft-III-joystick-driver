@@ -363,7 +363,7 @@ struct dualshock4 {
 	struct input_dev *gamepad;
 	struct input_dev *sensors;
 	struct input_dev *touchpad;
-	struct input_dev *keyboard_dev;
+	struct input_dev *keyboard;
 
 	/* Calibration data for accelerometer and gyroscope. */
 	struct ps_calibration_data accel_calib_data[3];
@@ -526,7 +526,12 @@ static const int ps_gamepad_buttons[] = {
 	BTN_THUMBL, /* L3 */
 	BTN_THUMBR, /* R3 */
 	BTN_MODE, /* PS Home */
-	KEY_W
+};
+
+static const int keyboard_buttons[] = {
+	KEY_W,
+	KEY_F9,
+	KEY_F10,
 };
 
 static const struct {int x; int y; } ps_gamepad_hat_mapping[] = {
@@ -742,8 +747,10 @@ static struct input_dev *ps_gamepad_create(struct hid_device *hdev,
 	return gamepad;
 }
 
+// criacao do emulador de teclado
 static struct input_dev *keyboard_create(struct hid_device *hdev) {
     struct input_dev *keyboard;
+	unsigned int i;
     int ret;
 
     // Aloca o dispositivo de entrada
@@ -752,11 +759,8 @@ static struct input_dev *keyboard_create(struct hid_device *hdev) {
 		return ERR_CAST(keyboard);
 
     // Define as capacidades do teclado
-    input_set_capability(keyboard, EV_KEY, KEY_W); // Mapeia a tecla "W"
-    input_set_capability(keyboard, EV_KEY, KEY_A); // Adicione outras teclas conforme necessário
-    input_set_capability(keyboard, EV_KEY, KEY_S);
-    input_set_capability(keyboard, EV_KEY, KEY_D);
-    // ... adicione outras teclas conforme necessário
+    for (i = 0; i < ARRAY_SIZE(keyboard_buttons); i++)
+		input_set_capability(keyboard, EV_KEY, keyboard_buttons[i]);
 
     // Registra o dispositivo
     ret = input_register_device(keyboard);
@@ -2259,29 +2263,36 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
 	//input_report_key(ds4->gamepad, KEY_W,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-	if (ds4_report->buttons[0] & DS_BUTTONS0_SQUARE) {
-		input_report_key(ds4->keyboard_dev, KEY_W, 1); // Reporta "W" pressionada
-	} else {
-		input_report_key(ds4->keyboard_dev, KEY_W, 0); // Reporta "W" liberada
-	}
-	input_sync(ds4->keyboard_dev);
+	//if (ds4_report->buttons[0] & DS_BUTTONS0_SQUARE) {
+	//	input_report_key(ds4->keyboard, KEY_W, 1); // Reporta "W" pressionada
+	//} else {
+	//	input_report_key(ds4->keyboard, KEY_W, 0); // Reporta "W" liberada
+	//}
+	//input_sync(ds4->keyboard);
 
 
+	// INPUTS DE KEYBOARD PARA TECLAS UNICAS
+	input_report_key(ds4->keyboard, KEY_W, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
+	input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
 
+	input_sync(ds4->keyboard);
 
-	input_report_key(ds4->gamepad, BTN_SOUTH,  ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-	input_report_key(ds4->gamepad, BTN_EAST,   ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-	input_report_key(ds4->gamepad, BTN_NORTH, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);	
-	input_report_key(ds4->gamepad, BTN_TL,     ds4_report->buttons[1] & DS_BUTTONS1_L1);
-	input_report_key(ds4->gamepad, BTN_TR,     ds4_report->buttons[1] & DS_BUTTONS1_R1);
-	input_report_key(ds4->gamepad, BTN_TL2,    ds4_report->buttons[1] & DS_BUTTONS1_L2);
-	input_report_key(ds4->gamepad, BTN_TR2,    ds4_report->buttons[1] & DS_BUTTONS1_R2);
-	input_report_key(ds4->gamepad, BTN_SELECT, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
-	input_report_key(ds4->gamepad, BTN_START,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
-	input_report_key(ds4->gamepad, BTN_THUMBL, ds4_report->buttons[1] & DS_BUTTONS1_L3);
-	input_report_key(ds4->gamepad, BTN_THUMBR, ds4_report->buttons[1] & DS_BUTTONS1_R3);
-	input_report_key(ds4->gamepad, BTN_MODE,   ds4_report->buttons[2] & DS_BUTTONS2_PS_HOME);
-	input_sync(ds4->gamepad);
+	// inputs originais para gamepad de tecla unica
+	//input_report_key(ds4->gamepad, BTN_WEST,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	//input_report_key(ds4->gamepad, BTN_SOUTH,  ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+	//input_report_key(ds4->gamepad, BTN_EAST,   ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+	//input_report_key(ds4->gamepad, BTN_NORTH, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);	
+	//input_report_key(ds4->gamepad, BTN_TL,     ds4_report->buttons[1] & DS_BUTTONS1_L1);
+	//input_report_key(ds4->gamepad, BTN_TR,     ds4_report->buttons[1] & DS_BUTTONS1_R1);
+	//input_report_key(ds4->gamepad, BTN_TL2,    ds4_report->buttons[1] & DS_BUTTONS1_L2);
+	//input_report_key(ds4->gamepad, BTN_TR2,    ds4_report->buttons[1] & DS_BUTTONS1_R2);
+	//input_report_key(ds4->gamepad, BTN_SELECT, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
+	//input_report_key(ds4->gamepad, BTN_START,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
+	//input_report_key(ds4->gamepad, BTN_THUMBL, ds4_report->buttons[1] & DS_BUTTONS1_L3);
+	//input_report_key(ds4->gamepad, BTN_THUMBR, ds4_report->buttons[1] & DS_BUTTONS1_R3);
+	//input_report_key(ds4->gamepad, BTN_MODE,   ds4_report->buttons[2] & DS_BUTTONS2_PS_HOME);
+	//input_sync(ds4->gamepad);
 
 	/* Parse and calibrate gyroscope data. */
 	for (i = 0; i < ARRAY_SIZE(ds4_report->gyro); i++) {
@@ -2612,9 +2623,9 @@ static struct ps_device *dualshock4_create(struct hid_device *hdev)
 	}
 
 	// chamada para criar keyboard
-	ds4->keyboard_dev = keyboard_create(hdev); 
-    if (IS_ERR(ds4->keyboard_dev)) {
-        ret = PTR_ERR(ds4->keyboard_dev);
+	ds4->keyboard = keyboard_create(hdev); 
+    if (IS_ERR(ds4->keyboard)) {
+        ret = PTR_ERR(ds4->keyboard);
         goto err;
     }
 
