@@ -529,7 +529,10 @@ static const int ps_gamepad_buttons[] = {
 };
 
 static const int keyboard_buttons[] = {
-	KEY_W,
+	KEY_A,
+	KEY_H,
+	KEY_S,
+	KEY_ESC,
 	KEY_F9,
 	KEY_F10,
 };
@@ -2272,7 +2275,11 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 
 
 	// INPUTS DE KEYBOARD PARA TECLAS UNICAS
-	input_report_key(ds4->keyboard, KEY_W, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
+	input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+	input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+
 	input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
 	input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
 
