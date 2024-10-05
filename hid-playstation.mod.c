@@ -35,17 +35,17 @@ MODULE_INFO(retpoline, "Y");
 
 static const struct modversion_info ____versions[]
 __used __section("__versions") = {
+	{ 0xad60b2af, "input_event" },
+	{ 0xb3d0f32a, "input_mt_report_slot_state" },
+	{ 0x59c5aee3, "input_mt_sync_frame" },
+	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0xdbc7d480, "hid_hw_raw_request" },
 	{ 0x4c03a563, "random_kmalloc_seed" },
 	{ 0x1512a32c, "kmalloc_caches" },
 	{ 0x44e87630, "kmalloc_trace" },
 	{ 0x37a0cba, "kfree" },
 	{ 0x2260e1e4, "_dev_warn" },
-	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0xe7d7df5, "_dev_info" },
-	{ 0xad60b2af, "input_event" },
-	{ 0xb3d0f32a, "input_mt_report_slot_state" },
-	{ 0x59c5aee3, "input_mt_sync_frame" },
 	{ 0x2d3385d3, "system_wq" },
 	{ 0xc5b6f236, "queue_work_on" },
 	{ 0xc5fe2641, "led_mc_calc_color_components" },
@@ -109,4 +109,4 @@ MODULE_ALIAS("hid:b0003g*v0000054Cp00000CE6");
 MODULE_ALIAS("hid:b0005g*v0000054Cp00000DF2");
 MODULE_ALIAS("hid:b0003g*v0000054Cp00000DF2");
 
-MODULE_INFO(srcversion, "E16D02E8116CC4886C37CD3");
+MODULE_INFO(srcversion, "5848219550134EB2E67B07D");

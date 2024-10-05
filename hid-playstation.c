@@ -2288,26 +2288,17 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 
 	// INPUTS DE KEYBOARD PARA TECLAS HAT
 	if (ps_gamepad_hat_mapping[value].y == -1) {
-    	input_report_key(ds4->keyboard, KEY_F1, 1); // Pressiona a tecla
+		input_report_key(ds4->keyboard, KEY_F1, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+		input_report_key(ds4->keyboard, KEY_F2, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
+		input_report_key(ds4->keyboard, KEY_F3, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 	} else {
-    	input_report_key(ds4->keyboard, KEY_F1, 0); // Solta a tecla
+		// INPUTS DE KEYBOARD PARA TECLAS UNICAS
+		input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+		input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
+		input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 	}
-	if (ps_gamepad_hat_mapping[value].x == 1) {
-    	input_report_key(ds4->keyboard, KEY_F2, 1); // Pressiona a tecla
-	} else {
-    	input_report_key(ds4->keyboard, KEY_F2, 0); // Solta a tecla
-	}
-	if (ps_gamepad_hat_mapping[value].y == 1) {
-    	input_report_key(ds4->keyboard, KEY_F3, 1); // Pressiona a tecla
-	} else {
-    	input_report_key(ds4->keyboard, KEY_F3, 0); // Solta a tecla
-	}
-
-	// INPUTS DE KEYBOARD PARA TECLAS UNICAS
-	input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-	input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
-	input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-	input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 
 	input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
 	input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
