@@ -529,6 +529,7 @@ static const int ps_gamepad_buttons[] = {
 };
 
 static const int keyboard_buttons[] = {
+	KEY_W,
 	KEY_A,
 	KEY_H,
 	KEY_S,
@@ -760,6 +761,7 @@ static struct input_dev *keyboard_create(struct hid_device *hdev) {
 	keyboard = ps_allocate_input_dev(hdev, "Keyboard");
 	if (IS_ERR(keyboard))
 		return ERR_CAST(keyboard);
+
 
     // Define as capacidades do teclado
     for (i = 0; i < ARRAY_SIZE(keyboard_buttons); i++)
@@ -2259,11 +2261,13 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	input_report_abs(ds4->gamepad, ABS_Z,  ds4_report->z);
 	input_report_abs(ds4->gamepad, ABS_RZ, ds4_report->rz);
 
-	value = ds4_report->buttons[0] & DS_BUTTONS0_HAT_SWITCH;
-	if (value >= ARRAY_SIZE(ps_gamepad_hat_mapping))
-		value = 8; /* center */
-	input_report_abs(ds4->gamepad, ABS_HAT0X, ps_gamepad_hat_mapping[value].x);
-	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
+
+	// input hat originais
+	//value = ds4_report->buttons[0] & DS_BUTTONS0_HAT_SWITCH;
+	//if (value >= ARRAY_SIZE(ps_gamepad_hat_mapping))
+	//	value = 8; /* center */
+	//input_report_abs(ds4->gamepad, ABS_HAT0X, ps_gamepad_hat_mapping[value].x);
+	//input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
 	//input_report_key(ds4->gamepad, KEY_W,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 	//if (ds4_report->buttons[0] & DS_BUTTONS0_SQUARE) {
@@ -2273,6 +2277,20 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	//}
 	//input_sync(ds4->keyboard);
 
+	// INPUTS HATS PARA TECLAS DE KEYBOARD
+	value = ds4_report->buttons[0] & DS_BUTTONS0_HAT_SWITCH;
+	if (value >= ARRAY_SIZE(ps_gamepad_hat_mapping))
+		value = 8; /* center */
+	
+
+	// INPUTS DE KEYBOARD PARA TECLAS HAT
+	if (ps_gamepad_hat_mapping[value].x == -1) {
+    	input_report_key(ds4->keyboard, KEY_W, 1); // Pressiona a tecla
+	} else {
+    	input_report_key(ds4->keyboard, KEY_W, 0); // Solta a tecla
+	}
+
+	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
 	// INPUTS DE KEYBOARD PARA TECLAS UNICAS
 	input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
@@ -2299,7 +2317,7 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	//input_report_key(ds4->gamepad, BTN_THUMBL, ds4_report->buttons[1] & DS_BUTTONS1_L3);
 	//input_report_key(ds4->gamepad, BTN_THUMBR, ds4_report->buttons[1] & DS_BUTTONS1_R3);
 	//input_report_key(ds4->gamepad, BTN_MODE,   ds4_report->buttons[2] & DS_BUTTONS2_PS_HOME);
-	//input_sync(ds4->gamepad);
+	input_sync(ds4->gamepad);
 
 	/* Parse and calibrate gyroscope data. */
 	for (i = 0; i < ARRAY_SIZE(ds4_report->gyro); i++) {
