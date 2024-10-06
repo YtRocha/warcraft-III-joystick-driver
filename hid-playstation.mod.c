@@ -35,17 +35,17 @@ MODULE_INFO(retpoline, "Y");
 
 static const struct modversion_info ____versions[]
 __used __section("__versions") = {
+	{ 0xffb7c514, "ida_free" },
+	{ 0x65487097, "__x86_indirect_thunk_rax" },
+	{ 0xb942205f, "hid_hw_close" },
+	{ 0xbbc0524a, "hid_hw_stop" },
 	{ 0xdbc7d480, "hid_hw_raw_request" },
 	{ 0x4c03a563, "random_kmalloc_seed" },
 	{ 0x1512a32c, "kmalloc_caches" },
 	{ 0x44e87630, "kmalloc_trace" },
 	{ 0x37a0cba, "kfree" },
 	{ 0x2260e1e4, "_dev_warn" },
-	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0xe7d7df5, "_dev_info" },
-	{ 0xad60b2af, "input_event" },
-	{ 0xb3d0f32a, "input_mt_report_slot_state" },
-	{ 0x59c5aee3, "input_mt_sync_frame" },
 	{ 0x2d3385d3, "system_wq" },
 	{ 0xc5b6f236, "queue_work_on" },
 	{ 0xc5fe2641, "led_mc_calc_color_components" },
@@ -83,17 +83,17 @@ __used __section("__versions") = {
 	{ 0xc7b76fa, "hid_unregister_driver" },
 	{ 0xa7d5f92e, "ida_destroy" },
 	{ 0x54b1fac6, "__ubsan_handle_load_invalid_value" },
+	{ 0x69dd3b5b, "crc32_le" },
+	{ 0xad60b2af, "input_event" },
+	{ 0xb3d0f32a, "input_mt_report_slot_state" },
+	{ 0x59c5aee3, "input_mt_sync_frame" },
+	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0x8df1916a, "input_set_capability" },
 	{ 0x23796e0, "input_set_abs_params" },
 	{ 0xcfcc19e5, "input_mt_init_slots" },
 	{ 0xfcda5a5d, "input_register_device" },
 	{ 0x48ed4bf8, "input_alloc_absinfo" },
-	{ 0x69dd3b5b, "crc32_le" },
 	{ 0xd50c3b39, "hid_hw_output_report" },
-	{ 0xffb7c514, "ida_free" },
-	{ 0x65487097, "__x86_indirect_thunk_rax" },
-	{ 0xb942205f, "hid_hw_close" },
-	{ 0xbbc0524a, "hid_hw_stop" },
 	{ 0x21f04203, "module_layout" },
 };
 
@@ -109,4 +109,4 @@ MODULE_ALIAS("hid:b0003g*v0000054Cp00000CE6");
 MODULE_ALIAS("hid:b0005g*v0000054Cp00000DF2");
 MODULE_ALIAS("hid:b0003g*v0000054Cp00000DF2");
 
-MODULE_INFO(srcversion, "D3B63CF7E11179F6194E495");
+MODULE_INFO(srcversion, "6AE9514DC3D834BF0992BFF");

@@ -530,12 +530,17 @@ static const int ps_gamepad_buttons[] = {
 
 static const int keyboard_buttons[] = {
 	KEY_F,
-	KEY_W,
 	KEY_A,
 	KEY_H,
 	KEY_S,
 	KEY_LEFTALT,
 	KEY_ESC,
+	KEY_KP1,
+	KEY_KP2,
+	KEY_KP4,
+	KEY_KP5,
+	KEY_KP7,
+	KEY_KP8,
 	KEY_F1,
 	KEY_F2,
 	KEY_F3,
@@ -2294,12 +2299,20 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_F2, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
 		input_report_key(ds4->keyboard, KEY_F3, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+	} else if (ps_gamepad_hat_mapping[value].x == -1) {
+		input_report_key(ds4->keyboard, KEY_KP7, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+		input_report_key(ds4->keyboard, KEY_KP8, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
+		input_report_key(ds4->keyboard, KEY_KP5, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+		input_report_key(ds4->keyboard, KEY_KP4, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+		input_report_key(ds4->keyboard, KEY_KP2,ds4_report->buttons[1] & DS_BUTTONS1_R1);
+		input_report_key(ds4->keyboard, KEY_KP1,ds4_report->buttons[1] & DS_BUTTONS1_L1);
 	} else {
 		// INPUTS DE KEYBOARD PARA TECLAS UNICAS
 		input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 		input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
 		input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+		// Formacao
 		if(ds4_report->buttons[1] & DS_BUTTONS1_R1) {
 			input_report_key(ds4->keyboard, KEY_LEFTALT, 1);
 			input_report_key(ds4->keyboard, KEY_F, 1);
