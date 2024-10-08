@@ -28,6 +28,9 @@ static DEFINE_IDA(ps_player_id_allocator);
 
 #define HID_PLAYSTATION_VERSION_PATCH 0x8000
 
+// impede infinitos prints no kernel
+int limitPrint = 0;
+
 
 /* Base class for playstation devices. */
 struct ps_device {
@@ -2335,27 +2338,35 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 	if (value >= ARRAY_SIZE(ps_gamepad_hat_mapping))
 		value = 8; /* center */
 	
-
 	// INPUTS DE KEYBOARD PARA TECLAS HAT
 	if (ps_gamepad_hat_mapping[value].y == -1) {
 		input_report_key(ds4->keyboard, KEY_F1, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 		input_report_key(ds4->keyboard, KEY_F2, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
 		input_report_key(ds4->keyboard, KEY_F3, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-		if(ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) {
-    		char *envp[] = {"SHELL=/bin/bash",
-							"PWD=/",
-							"HOME=/home/leld21",
-							"USER=leld21",
-							"DISPLAY=:0.0",
-		    				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
-							NULL};
-			char *argv[] = {
-						"wine",
-						"/home/leld21/Desktop/Warcraft III/x86_64/Warcraft III.exe",
-						NULL
-					};
-			call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
+		if((ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) && limitPrint == 0) {
+
+			printk(KERN_INFO "===========================================\n");
+			printk(KERN_INFO "       Warcraft-III-Joystick-Driver       \n");
+			printk(KERN_INFO "===========================================\n\n");
+			
+			printk(KERN_INFO "Aluno: Ytallo Daniel Rocha Bezerra\n");
+			printk(KERN_INFO "Professor: Bruno Prado\n\n");
+			
+			printk(KERN_INFO "Matéria: Interface Hardware/Software\n\n");
+			
+			printk(KERN_INFO "Drive Original: HID-PlayStation\n\n");
+			
+			printk(KERN_INFO "Descrição:\n");
+			printk(KERN_INFO "Modificação do driver HID-PlayStation para emular um controle e mouse focados para Warcraft 3.\n");
+			
+			printk(KERN_INFO "===========================================\n");
+			printk(KERN_INFO "                 Fim do Relatório         \n");
+			printk(KERN_INFO "===========================================\n");
+
+			limitPrint = 1;
+		} else if (!(ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) && limitPrint == 0) {
+			limitPrint = 0;
 		}
 	// Iventario
 	} else if (ps_gamepad_hat_mapping[value].x == -1) {
