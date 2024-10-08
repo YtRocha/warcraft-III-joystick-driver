@@ -549,6 +549,7 @@ static const int keyboard_buttons[] = {
 	KEY_F1,
 	KEY_F2,
 	KEY_F3,
+	KEY_F8,
 	KEY_F9,
 	KEY_F10,
 };
@@ -2327,6 +2328,7 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_KP4, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 		input_report_key(ds4->keyboard, KEY_KP2,ds4_report->buttons[1] & DS_BUTTONS1_R1);
 		input_report_key(ds4->keyboard, KEY_KP1,ds4_report->buttons[1] & DS_BUTTONS1_L1);
+	// PEOES
 	} else if (ps_gamepad_hat_mapping[value].y == 1) {
 		input_report_key(ds4->keyboard, KEY_B, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 		input_report_key(ds4->keyboard, KEY_R, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
@@ -2342,6 +2344,8 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
 		input_report_key(ds4->keyboard, KEY_LEFTSHIFT, ds4_report->buttons[1] & DS_BUTTONS1_L1);
 		input_report_key(ds4->keyboard, KEY_LEFTCTRL, ds4_report->buttons[1] & DS_BUTTONS1_L2);
+		input_report_key(ds4->keyboard, KEY_F8, ds4_report->buttons[1] & DS_BUTTONS1_R2);
+
 
 		// Formacao
 		if(ds4_report->buttons[1] & DS_BUTTONS1_R1) {
