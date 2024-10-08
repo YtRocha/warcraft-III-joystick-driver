@@ -529,10 +529,15 @@ static const int ps_gamepad_buttons[] = {
 };
 
 static const int keyboard_buttons[] = {
+	KEY_B,
+	KEY_R,
+	KEY_G,
 	KEY_F,
 	KEY_A,
 	KEY_H,
 	KEY_S,
+	KEY_LEFTSHIFT,
+	KEY_LEFTCTRL,
 	KEY_LEFTALT,
 	KEY_ESC,
 	KEY_KP1,
@@ -2299,6 +2304,22 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_F2, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
 		input_report_key(ds4->keyboard, KEY_F3, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+		if(ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) {
+    		char *envp[] = {"SHELL=/bin/bash",
+							"PWD=/",
+							"HOME=/home/leld21",
+							"USER=leld21",
+							"DISPLAY=:0.0",
+		    				"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							NULL};
+			char *argv[] = {
+						"wine",
+						"/home/leld21/Desktop/Warcraft III/x86_64/Warcraft III.exe",
+						NULL
+					};
+			call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
+		}
+	// Iventario
 	} else if (ps_gamepad_hat_mapping[value].x == -1) {
 		input_report_key(ds4->keyboard, KEY_KP7, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 		input_report_key(ds4->keyboard, KEY_KP8, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
@@ -2306,12 +2327,22 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_KP4, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 		input_report_key(ds4->keyboard, KEY_KP2,ds4_report->buttons[1] & DS_BUTTONS1_R1);
 		input_report_key(ds4->keyboard, KEY_KP1,ds4_report->buttons[1] & DS_BUTTONS1_L1);
+	} else if (ps_gamepad_hat_mapping[value].y == 1) {
+		input_report_key(ds4->keyboard, KEY_B, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+		input_report_key(ds4->keyboard, KEY_R, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
+		input_report_key(ds4->keyboard, KEY_G, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
 	} else {
 		// INPUTS DE KEYBOARD PARA TECLAS UNICAS
 		input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
 		input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
 		input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
 		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+		input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
+		input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
+		input_report_key(ds4->keyboard, KEY_LEFTSHIFT, ds4_report->buttons[1] & DS_BUTTONS1_L1);
+		input_report_key(ds4->keyboard, KEY_LEFTCTRL, ds4_report->buttons[1] & DS_BUTTONS1_L2);
+
 		// Formacao
 		if(ds4_report->buttons[1] & DS_BUTTONS1_R1) {
 			input_report_key(ds4->keyboard, KEY_LEFTALT, 1);
@@ -2321,9 +2352,8 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 			input_report_key(ds4->keyboard, KEY_F, 0);
 		}
 	}
-
-	input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
-	input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
+	
+	
 
 
 	input_sync(ds4->keyboard);
