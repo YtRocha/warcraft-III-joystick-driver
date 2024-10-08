@@ -1,0 +1,1 @@
+savedcmd_/home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/modules.order := {   echo /home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/hid-playstation.o; :; } > /home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/modules.order

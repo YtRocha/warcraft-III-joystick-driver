@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Nome do módulo
+MODULE_NAME="hid-playstation"
+
+# Verifica se o script está sendo executado como root
+if [ "$EUID" -ne 0 ]; then
+  echo "Por favor, execute este script como root ou use sudo."
+  exit 1
+fi
+
+# Função de ajuda
+show_help() {
+  echo "Uso: $0 [mod|original]"
+  echo "  mod      Compila e insere o módulo hid-playstation."
+  echo "  original Compila e insere o módulo a partir da pasta drive_original."
+  exit 1
+}
+
+# Verifica os argumentos
+if [ "$#" -ne 1 ]; then
+  show_help
+fi
+
+# Ação baseada na entrada
+case "$1" in
+  mod)
+    # Compila o módulo
+    echo "Compilando o módulo..."
+    make
+
+    # Remove o módulo, se estiver carregado
+    echo "Removendo o módulo, se estiver carregado..."
+    rmmod $MODULE_NAME 2>/dev/null
+
+    # Insere o módulo
+    echo "Inserindo o módulo..."
+    insmod ./$MODULE_NAME.ko
+    echo "Módulo $MODULE_NAME inserido."
+    ;;
+    
+  original)
+    # Muda para a pasta drive_original e compila o módulo
+    if [ -d "./drive_original" ]; then
+      cd ./drive_original || { echo "Falha ao acessar a pasta drive_original."; exit 1; }
+      echo "Compilando o módulo a partir da pasta drive_original..."
+      make
+
+      # Remove o módulo, se estiver carregado
+      echo "Removendo o módulo, se estiver carregado..."
+      rmmod $MODULE_NAME 2>/dev/null
+
+      # Insere o módulo
+      echo "Inserindo o módulo..."
+      insmod ./$MODULE_NAME.ko
+      echo "Módulo $MODULE_NAME inserido."
+    else
+      echo "A pasta 'drive_original' não existe."
+      exit 1
+    fi
+    ;;
+
+  *)
+    show_help
+    ;;
+esac

@@ -35,11 +35,6 @@ MODULE_INFO(retpoline, "Y");
 
 static const struct modversion_info ____versions[]
 __used __section("__versions") = {
-	{ 0x48ed4bf8, "input_alloc_absinfo" },
-	{ 0xd50c3b39, "hid_hw_output_report" },
-	{ 0xffb7c514, "ida_free" },
-	{ 0x65487097, "__x86_indirect_thunk_rax" },
-	{ 0xb942205f, "hid_hw_close" },
 	{ 0xbbc0524a, "hid_hw_stop" },
 	{ 0xdbc7d480, "hid_hw_raw_request" },
 	{ 0x4c03a563, "random_kmalloc_seed" },
@@ -47,11 +42,15 @@ __used __section("__versions") = {
 	{ 0x44e87630, "kmalloc_trace" },
 	{ 0x37a0cba, "kfree" },
 	{ 0x2260e1e4, "_dev_warn" },
+	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0xe7d7df5, "_dev_info" },
+	{ 0xad60b2af, "input_event" },
+	{ 0xb3d0f32a, "input_mt_report_slot_state" },
+	{ 0x59c5aee3, "input_mt_sync_frame" },
 	{ 0x2d3385d3, "system_wq" },
 	{ 0xc5b6f236, "queue_work_on" },
-	{ 0xc5fe2641, "led_mc_calc_color_components" },
 	{ 0x221e0632, "input_ff_create_memless" },
+	{ 0xc5fe2641, "led_mc_calc_color_components" },
 	{ 0xde3576f8, "hid_open_report" },
 	{ 0xd007ee1d, "hid_hw_start" },
 	{ 0x20a9c5c9, "hid_hw_open" },
@@ -61,7 +60,6 @@ __used __section("__versions") = {
 	{ 0xbcab6ee6, "sscanf" },
 	{ 0xe7a02573, "ida_alloc_range" },
 	{ 0x24838e3a, "devm_led_classdev_multicolor_register_ext" },
-	{ 0x23c878a2, "input_free_device" },
 	{ 0xcbd4898c, "fortify_panic" },
 	{ 0xbdfb6dbb, "__fentry__" },
 	{ 0xf90a1e85, "__x86_indirect_thunk_r8" },
@@ -85,20 +83,20 @@ __used __section("__versions") = {
 	{ 0xc7b76fa, "hid_unregister_driver" },
 	{ 0xa7d5f92e, "ida_destroy" },
 	{ 0x54b1fac6, "__ubsan_handle_load_invalid_value" },
-	{ 0x69dd3b5b, "crc32_le" },
-	{ 0xad60b2af, "input_event" },
-	{ 0xb3d0f32a, "input_mt_report_slot_state" },
-	{ 0x59c5aee3, "input_mt_sync_frame" },
-	{ 0x122c3a7e, "_printk" },
-	{ 0x87a21cb3, "__ubsan_handle_out_of_bounds" },
 	{ 0x8df1916a, "input_set_capability" },
 	{ 0x23796e0, "input_set_abs_params" },
 	{ 0xcfcc19e5, "input_mt_init_slots" },
 	{ 0xfcda5a5d, "input_register_device" },
+	{ 0x48ed4bf8, "input_alloc_absinfo" },
+	{ 0x69dd3b5b, "crc32_le" },
+	{ 0xd50c3b39, "hid_hw_output_report" },
+	{ 0xffb7c514, "ida_free" },
+	{ 0x65487097, "__x86_indirect_thunk_rax" },
+	{ 0xb942205f, "hid_hw_close" },
 	{ 0x21f04203, "module_layout" },
 };
 
-MODULE_INFO(depends, "hid,led-class-multicolor,ff-memless");
+MODULE_INFO(depends, "hid,ff-memless,led-class-multicolor");
 
 MODULE_ALIAS("hid:b0005g*v0000054Cp000005C4");
 MODULE_ALIAS("hid:b0003g*v0000054Cp000005C4");
@@ -110,4 +108,4 @@ MODULE_ALIAS("hid:b0003g*v0000054Cp00000CE6");
 MODULE_ALIAS("hid:b0005g*v0000054Cp00000DF2");
 MODULE_ALIAS("hid:b0003g*v0000054Cp00000DF2");
 
-MODULE_INFO(srcversion, "5FB0616C0AF9D963D090051");
+MODULE_INFO(srcversion, "363BD20618302AF4E178729");

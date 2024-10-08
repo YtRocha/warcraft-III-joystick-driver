@@ -1,0 +1,1 @@
+savedcmd_/home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/Module.symvers -T /home/leld21/Documents/GitHub/warcraft-III-joystick-driver/drive_original/modules.order -i Module.symvers -e 

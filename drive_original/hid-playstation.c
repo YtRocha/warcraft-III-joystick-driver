@@ -11,7 +11,6 @@
 #include <linux/hid.h>
 #include <linux/idr.h>
 #include <linux/input/mt.h>
-#include <linux/input.h>
 #include <linux/leds.h>
 #include <linux/led-class-multicolor.h>
 #include <linux/module.h>
@@ -27,10 +26,6 @@ static LIST_HEAD(ps_devices_list);
 static DEFINE_IDA(ps_player_id_allocator);
 
 #define HID_PLAYSTATION_VERSION_PATCH 0x8000
-
-// impede infinitos prints no kernel
-int limitPrint = 0;
-
 
 /* Base class for playstation devices. */
 struct ps_device {
@@ -366,8 +361,6 @@ struct dualshock4 {
 	struct input_dev *gamepad;
 	struct input_dev *sensors;
 	struct input_dev *touchpad;
-	struct input_dev *keyboard;
-	struct input_dev *mouse;
 
 	/* Calibration data for accelerometer and gyroscope. */
 	struct ps_calibration_data accel_calib_data[3];
@@ -530,33 +523,6 @@ static const int ps_gamepad_buttons[] = {
 	BTN_THUMBL, /* L3 */
 	BTN_THUMBR, /* R3 */
 	BTN_MODE, /* PS Home */
-};
-
-static const int keyboard_buttons[] = {
-	KEY_B,
-	KEY_R,
-	KEY_G,
-	KEY_F,
-	KEY_A,
-	KEY_H,
-	KEY_S,
-	KEY_LEFTSHIFT,
-	KEY_LEFTCTRL,
-	KEY_LEFTALT,
-	KEY_ESC,
-	KEY_KP1,
-	KEY_KP2,
-	KEY_KP4,
-	KEY_KP5,
-	KEY_KP7,
-	KEY_KP8,
-	KEY_F1,
-	KEY_F2,
-	KEY_F3,
-	KEY_F8,
-	KEY_F9,
-	KEY_F10,
-	KEY_F12,
 };
 
 static const struct {int x; int y; } ps_gamepad_hat_mapping[] = {
@@ -770,61 +736,6 @@ static struct input_dev *ps_gamepad_create(struct hid_device *hdev,
 		return ERR_PTR(ret);
 
 	return gamepad;
-}
-
-// criacao de emulador para mouse
-static struct input_dev *mouse_create(struct hid_device *hdev)
-{
-	struct input_dev *mouse;
-	int ret;
-
-	mouse = ps_allocate_input_dev(hdev, "Mouse");
-	if (IS_ERR(mouse))
-		return ERR_CAST(mouse);
-
-	input_set_abs_params(mouse, ABS_X, 0, 255, 0, 0);
-	input_set_abs_params(mouse, ABS_Y, 0, 255, 0, 0);
-	input_set_abs_params(mouse, ABS_Z, 0, 255, 0, 0);
-	input_set_abs_params(mouse, ABS_RX, 0, 255, 0, 0);
-	input_set_abs_params(mouse, ABS_RY, 0, 255, 0, 0);
-	input_set_abs_params(mouse, ABS_RZ, 0, 255, 0, 0);
-
-	input_set_capability(mouse, EV_KEY, BTN_LEFT);
-	input_set_capability(mouse, EV_KEY, BTN_RIGHT);
-
-
-
-	ret = input_register_device(mouse);
-	if (ret)
-		return ERR_PTR(ret);
-
-	return mouse;
-}
-
-// criacao do emulador de teclado
-static struct input_dev *keyboard_create(struct hid_device *hdev) {
-    struct input_dev *keyboard;
-	unsigned int i;
-    int ret;
-
-    // Aloca o dispositivo de entrada
-	keyboard = ps_allocate_input_dev(hdev, "Keyboard");
-	if (IS_ERR(keyboard))
-		return ERR_CAST(keyboard);
-
-
-    // Define as capacidades do teclado
-    for (i = 0; i < ARRAY_SIZE(keyboard_buttons); i++)
-		input_set_capability(keyboard, EV_KEY, keyboard_buttons[i]);
-
-    // Registra o dispositivo
-    ret = input_register_device(keyboard);
-    if (ret) {
-        input_free_device(keyboard);
-        return ERR_PTR(ret);
-    }
-
-    return keyboard;
 }
 
 static int ps_get_report(struct hid_device *hdev, uint8_t report_id, uint8_t *buf, size_t size,
@@ -1753,7 +1664,6 @@ static struct ps_device *dualsense_create(struct hid_device *hdev)
 		ret = PTR_ERR(ds->gamepad);
 		goto err;
 	}
-
 	/* Use gamepad input device name as primary device name for e.g. LEDs */
 	ps_dev->input_dev_name = dev_name(&ds->gamepad->dev);
 
@@ -2304,99 +2214,33 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		return -1;
 	}
 
+	input_report_abs(ds4->gamepad, ABS_X,  ds4_report->x);
+	input_report_abs(ds4->gamepad, ABS_Y,  ds4_report->y);
+	input_report_abs(ds4->gamepad, ABS_RX, ds4_report->rx);
+	input_report_abs(ds4->gamepad, ABS_RY, ds4_report->ry);
+	input_report_abs(ds4->gamepad, ABS_Z,  ds4_report->z);
+	input_report_abs(ds4->gamepad, ABS_RZ, ds4_report->rz);
 
-	// Report para utilizar o mouse
-	input_report_abs(ds4->mouse, ABS_X,  ds4_report->x);
-	input_report_abs(ds4->mouse, ABS_Y,  ds4_report->y);
-	input_report_abs(ds4->mouse, ABS_RX, ds4_report->rx);
-	input_report_abs(ds4->mouse, ABS_RY, ds4_report->ry);
-	input_report_abs(ds4->mouse, ABS_Z,  ds4_report->z);
-	input_report_abs(ds4->mouse, ABS_RZ, ds4_report->rz);
-	input_report_key(ds4->mouse, BTN_LEFT, ds4_report->buttons[1] & DS_BUTTONS1_L3);
-	input_report_key(ds4->mouse, BTN_RIGHT, ds4_report->buttons[1] & DS_BUTTONS1_R3);
-
-	// INPUTS HATS PARA TECLAS DE KEYBOARD
 	value = ds4_report->buttons[0] & DS_BUTTONS0_HAT_SWITCH;
 	if (value >= ARRAY_SIZE(ps_gamepad_hat_mapping))
 		value = 8; /* center */
-	
-	// INPUTS DE KEYBOARD PARA TECLAS HAT
-	if (ps_gamepad_hat_mapping[value].y == -1) {
-		input_report_key(ds4->keyboard, KEY_F1, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-		input_report_key(ds4->keyboard, KEY_F2, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
-		input_report_key(ds4->keyboard, KEY_F3, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-		if((ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) && limitPrint == 0) {
+	input_report_abs(ds4->gamepad, ABS_HAT0X, ps_gamepad_hat_mapping[value].x);
+	input_report_abs(ds4->gamepad, ABS_HAT0Y, ps_gamepad_hat_mapping[value].y);
 
-			printk(KERN_INFO "===========================================\n");
-			printk(KERN_INFO "       Warcraft-III-Joystick-Driver       \n");
-			printk(KERN_INFO "===========================================\n\n");
-			
-			printk(KERN_INFO "Aluno: Ytallo Daniel Rocha Bezerra\n");
-			printk(KERN_INFO "Professor: Bruno Prado\n\n");
-			
-			printk(KERN_INFO "Matéria: Interface Hardware/Software\n\n");
-			
-			printk(KERN_INFO "Drive Original: HID-PlayStation\n\n");
-			
-			printk(KERN_INFO "Descrição:\n");
-			printk(KERN_INFO "Modificação do driver HID-PlayStation para emular um controle e mouse focados para Warcraft 3.\n");
-			
-			printk(KERN_INFO "===========================================\n");
-			printk(KERN_INFO "                 Fim do Relatório         \n");
-			printk(KERN_INFO "===========================================\n");
-
-			limitPrint = 1;
-		} else if (!(ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS) && limitPrint == 0) {
-			limitPrint = 0;
-		}
-	// Iventario
-	} else if (ps_gamepad_hat_mapping[value].x == -1) {
-		input_report_key(ds4->keyboard, KEY_KP7, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-		input_report_key(ds4->keyboard, KEY_KP8, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
-		input_report_key(ds4->keyboard, KEY_KP5, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-		input_report_key(ds4->keyboard, KEY_KP4, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-		input_report_key(ds4->keyboard, KEY_KP2,ds4_report->buttons[1] & DS_BUTTONS1_R1);
-		input_report_key(ds4->keyboard, KEY_KP1,ds4_report->buttons[1] & DS_BUTTONS1_L1);
-	// PEOES
-	} else if (ps_gamepad_hat_mapping[value].y == 1) {
-		input_report_key(ds4->keyboard, KEY_B, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-		input_report_key(ds4->keyboard, KEY_R, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
-		input_report_key(ds4->keyboard, KEY_G, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-	} else {
-		// INPUTS DE KEYBOARD PARA TECLAS UNICAS
-		input_report_key(ds4->keyboard, KEY_A, ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
-		input_report_key(ds4->keyboard, KEY_S, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);
-		input_report_key(ds4->keyboard, KEY_H, ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
-		input_report_key(ds4->keyboard, KEY_ESC, ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
-		input_report_key(ds4->keyboard, KEY_F10,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
-		input_report_key(ds4->keyboard, KEY_F9, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
-		input_report_key(ds4->keyboard, KEY_LEFTSHIFT, ds4_report->buttons[1] & DS_BUTTONS1_L1);
-		input_report_key(ds4->keyboard, KEY_LEFTCTRL, ds4_report->buttons[1] & DS_BUTTONS1_L2);
-		input_report_key(ds4->keyboard, KEY_F8, ds4_report->buttons[1] & DS_BUTTONS1_R2);
-
-		if (ps_gamepad_hat_mapping[value].x == 1) {
-			input_report_key(ds4->keyboard, KEY_F12, 1);
-		} else {
-			input_report_key(ds4->keyboard, KEY_F12, 0);
-		}
-
-
-		// Formacao
-		if(ds4_report->buttons[1] & DS_BUTTONS1_R1) {
-			input_report_key(ds4->keyboard, KEY_LEFTALT, 1);
-			input_report_key(ds4->keyboard, KEY_F, 1);
-		} else {
-			input_report_key(ds4->keyboard, KEY_LEFTALT, 0);
-			input_report_key(ds4->keyboard, KEY_F, 0);
-		}
-	}
-	
-	
-
-
-	input_sync(ds4->keyboard);
+	input_report_key(ds4->gamepad, BTN_WEST,   ds4_report->buttons[0] & DS_BUTTONS0_SQUARE);
+	input_report_key(ds4->gamepad, BTN_SOUTH,  ds4_report->buttons[0] & DS_BUTTONS0_CROSS);
+	input_report_key(ds4->gamepad, BTN_EAST,   ds4_report->buttons[0] & DS_BUTTONS0_CIRCLE);
+	input_report_key(ds4->gamepad, BTN_NORTH, ds4_report->buttons[0] & DS_BUTTONS0_TRIANGLE);	
+	input_report_key(ds4->gamepad, KEY_W, 0);
+	input_report_key(ds4->gamepad, BTN_TL,     ds4_report->buttons[1] & DS_BUTTONS1_L1);
+	input_report_key(ds4->gamepad, BTN_TR,     ds4_report->buttons[1] & DS_BUTTONS1_R1);
+	input_report_key(ds4->gamepad, BTN_TL2,    ds4_report->buttons[1] & DS_BUTTONS1_L2);
+	input_report_key(ds4->gamepad, BTN_TR2,    ds4_report->buttons[1] & DS_BUTTONS1_R2);
+	input_report_key(ds4->gamepad, BTN_SELECT, ds4_report->buttons[1] & DS_BUTTONS1_CREATE);
+	input_report_key(ds4->gamepad, BTN_START,  ds4_report->buttons[1] & DS_BUTTONS1_OPTIONS);
+	input_report_key(ds4->gamepad, BTN_THUMBL, ds4_report->buttons[1] & DS_BUTTONS1_L3);
+	input_report_key(ds4->gamepad, BTN_THUMBR, ds4_report->buttons[1] & DS_BUTTONS1_R3);
+	input_report_key(ds4->gamepad, BTN_MODE,   ds4_report->buttons[2] & DS_BUTTONS2_PS_HOME);
 	input_sync(ds4->gamepad);
 
 	/* Parse and calibrate gyroscope data. */
@@ -2458,7 +2302,6 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_sync(ds4->touchpad);
 	}
 	input_report_key(ds4->touchpad, BTN_LEFT, ds4_report->buttons[2] & DS_BUTTONS2_TOUCHPAD);
-
 
 	/*
 	 * Interpretation of the battery_capacity data depends on the cable state.
@@ -2728,20 +2571,6 @@ static struct ps_device *dualshock4_create(struct hid_device *hdev)
 		goto err;
 	}
 
-	// chamada para criar keyboard
-	ds4->keyboard = keyboard_create(hdev); 
-    if (IS_ERR(ds4->keyboard)) {
-        ret = PTR_ERR(ds4->keyboard);
-        goto err;
-    }
-
-	// chamada para criar mouse
-	ds4->mouse = mouse_create(hdev); 
-    if (IS_ERR(ds4->mouse)) {
-        ret = PTR_ERR(ds4->mouse);
-        goto err;
-    }
-
 	/* Use gamepad input device name as primary device name for e.g. LEDs */
 	ps_dev->input_dev_name = dev_name(&ds4->gamepad->dev);
 
@@ -2910,6 +2739,6 @@ static void __exit ps_exit(void)
 module_init(ps_init);
 module_exit(ps_exit);
 
-MODULE_AUTHOR("Sony Interactive Entertainment. Modificado por YtRocha");
-MODULE_DESCRIPTION("HID Driver for PlayStation peripherals. Modificado para emular mouse e teclado com funcoes especificas para jogar warcraft III reign of chaos");
+MODULE_AUTHOR("Sony Interactive Entertainment");
+MODULE_DESCRIPTION("HID Driver for PlayStation peripherals.");
 MODULE_LICENSE("GPL");
