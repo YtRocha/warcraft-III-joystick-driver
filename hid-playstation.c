@@ -552,6 +552,7 @@ static const int keyboard_buttons[] = {
 	KEY_F8,
 	KEY_F9,
 	KEY_F10,
+	KEY_F12,
 };
 
 static const struct {int x; int y; } ps_gamepad_hat_mapping[] = {
@@ -2345,6 +2346,12 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		input_report_key(ds4->keyboard, KEY_LEFTSHIFT, ds4_report->buttons[1] & DS_BUTTONS1_L1);
 		input_report_key(ds4->keyboard, KEY_LEFTCTRL, ds4_report->buttons[1] & DS_BUTTONS1_L2);
 		input_report_key(ds4->keyboard, KEY_F8, ds4_report->buttons[1] & DS_BUTTONS1_R2);
+
+		if (ps_gamepad_hat_mapping[value].x == 1) {
+			input_report_key(ds4->keyboard, KEY_F12, 1);
+		} else {
+			input_report_key(ds4->keyboard, KEY_F12, 0);
+		}
 
 
 		// Formacao
