@@ -364,6 +364,7 @@ struct dualshock4 {
 	struct input_dev *sensors;
 	struct input_dev *touchpad;
 	struct input_dev *keyboard;
+	struct input_dev *mouse;
 
 	/* Calibration data for accelerometer and gyroscope. */
 	struct ps_calibration_data accel_calib_data[3];
@@ -766,6 +767,35 @@ static struct input_dev *ps_gamepad_create(struct hid_device *hdev,
 		return ERR_PTR(ret);
 
 	return gamepad;
+}
+
+// criacao de emulador para mouse
+static struct input_dev *mouse_create(struct hid_device *hdev)
+{
+	struct input_dev *mouse;
+	int ret;
+
+	mouse = ps_allocate_input_dev(hdev, "Mouse");
+	if (IS_ERR(mouse))
+		return ERR_CAST(mouse);
+
+	input_set_abs_params(mouse, ABS_X, 0, 255, 0, 0);
+	input_set_abs_params(mouse, ABS_Y, 0, 255, 0, 0);
+	input_set_abs_params(mouse, ABS_Z, 0, 255, 0, 0);
+	input_set_abs_params(mouse, ABS_RX, 0, 255, 0, 0);
+	input_set_abs_params(mouse, ABS_RY, 0, 255, 0, 0);
+	input_set_abs_params(mouse, ABS_RZ, 0, 255, 0, 0);
+
+	input_set_capability(mouse, EV_KEY, BTN_LEFT);
+	input_set_capability(mouse, EV_KEY, BTN_RIGHT);
+
+
+
+	ret = input_register_device(mouse);
+	if (ret)
+		return ERR_PTR(ret);
+
+	return mouse;
 }
 
 // criacao do emulador de teclado
@@ -2271,13 +2301,19 @@ static int dualshock4_parse_report(struct ps_device *ps_dev, struct hid_report *
 		return -1;
 	}
 
-	input_report_abs(ds4->gamepad, ABS_X,  ds4_report->x);
-	input_report_abs(ds4->gamepad, ABS_Y,  ds4_report->y);
-	input_report_abs(ds4->gamepad, ABS_RX, ds4_report->rx);
-	input_report_abs(ds4->gamepad, ABS_RY, ds4_report->ry);
-	input_report_abs(ds4->gamepad, ABS_Z,  ds4_report->z);
-	input_report_abs(ds4->gamepad, ABS_RZ, ds4_report->rz);
 
+	// Report para utilizar o mouse
+	input_report_abs(ds4->mouse, ABS_X,  ds4_report->x);
+	input_report_abs(ds4->mouse, ABS_Y,  ds4_report->y);
+	input_report_abs(ds4->mouse, ABS_RX, ds4_report->rx);
+	input_report_abs(ds4->mouse, ABS_RY, ds4_report->ry);
+	input_report_abs(ds4->mouse, ABS_Z,  ds4_report->z);
+	input_report_abs(ds4->mouse, ABS_RZ, ds4_report->rz);
+	input_report_key(ds4->mouse, BTN_LEFT, ds4_report->buttons[1] & DS_BUTTONS1_L3);
+	input_report_key(ds4->mouse, BTN_RIGHT, ds4_report->buttons[1] & DS_BUTTONS1_R3);
+
+
+	
 
 	// input hat originais
 	//value = ds4_report->buttons[0] & DS_BUTTONS0_HAT_SWITCH;
@@ -2718,6 +2754,13 @@ static struct ps_device *dualshock4_create(struct hid_device *hdev)
 	ds4->keyboard = keyboard_create(hdev); 
     if (IS_ERR(ds4->keyboard)) {
         ret = PTR_ERR(ds4->keyboard);
+        goto err;
+    }
+
+	// chamada para criar mouse
+	ds4->mouse = mouse_create(hdev); 
+    if (IS_ERR(ds4->mouse)) {
+        ret = PTR_ERR(ds4->mouse);
         goto err;
     }
 
