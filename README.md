@@ -8,3 +8,5 @@ Como sudo execute o use com a opção mod.
 Para retornar ao drive original, basta como sudo executar use com a opção original. <br>
 Ex: sudo ./use mod <br>
 EX: sudo ./use original
+
+#### O arquivo do drive é hid-playstation.c
